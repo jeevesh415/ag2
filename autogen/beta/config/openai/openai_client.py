@@ -14,7 +14,7 @@ from openai.types.chat import ChatCompletion, ChatCompletionChunk
 from typing_extensions import Required
 
 from autogen.beta.config.client import LLMClient
-from autogen.beta.context import Context
+from autogen.beta.context import ConversationContext
 from autogen.beta.events import (
     BaseEvent,
     ModelMessage,
@@ -63,6 +63,7 @@ class CreateOptions(TypedDict, total=False):
     stream: bool
     stream_options: dict[str, Any] | Omit
     reasoning_effort: ReasoningEffort | None | Omit
+    extra_body: dict[str, Any] | None
 
 
 class OpenAIClient(LLMClient):
@@ -99,7 +100,7 @@ class OpenAIClient(LLMClient):
     async def __call__(
         self,
         messages: Sequence[BaseEvent],
-        context: Context,
+        context: "ConversationContext",
         *,
         tools: Iterable[ToolSchema],
         response_schema: ResponseProto | None,
@@ -134,7 +135,7 @@ class OpenAIClient(LLMClient):
     async def _process_completion(
         self,
         completion: ChatCompletion,
-        context: Context,
+        context: "ConversationContext",
     ) -> ModelResponse:
         for choice in completion.choices or ():
             msg = choice.message
@@ -168,7 +169,7 @@ class OpenAIClient(LLMClient):
     async def _process_stream(
         self,
         response_stream: AsyncStream[ChatCompletionChunk],
-        context: Context,
+        context: "ConversationContext",
     ) -> ModelResponse:
         full_content: str = ""
         usage = Usage()
