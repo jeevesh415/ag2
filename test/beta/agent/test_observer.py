@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from autogen.beta import Agent, Context, Depends, Inject, Variable, observer
-from autogen.beta.events import ModelRequest, ModelResponse, ToolCallEvent
+from autogen.beta.events import BaseEvent, ModelRequest, ModelResponse, ToolCallEvent
 from autogen.beta.testing import TestConfig
 
 
@@ -52,6 +52,24 @@ async def test_observer_does_not_fire_on_non_matching_event(
 
 
 @pytest.mark.asyncio()
+async def test_observer_with_inverted_type(
+    mock: MagicMock,
+    test_config: TestConfig,
+) -> None:
+    agent = Agent(
+        "",
+        config=test_config,
+        observers=[observer(~ToolCallEvent, mock)],
+    )
+
+    await agent.ask("Hi!")
+
+    mock.assert_called()
+    for call in mock.call_args_list:
+        assert not isinstance(call[0][0], ToolCallEvent)
+
+
+@pytest.mark.asyncio()
 async def test_multiple_observers(
     mock: MagicMock,
     test_config: TestConfig,
@@ -72,7 +90,7 @@ async def test_multiple_observers(
 
 
 @pytest.mark.asyncio()
-async def test_async_observer(
+async def test_async_decorated(
     mock: MagicMock,
     test_config: TestConfig,
 ) -> None:
@@ -92,7 +110,27 @@ async def test_async_observer(
 
 
 @pytest.mark.asyncio()
-async def test_decorator_style(
+async def test_decorate_any_event(
+    mock: MagicMock,
+    test_config: TestConfig,
+) -> None:
+    @observer()
+    async def track_response(event: BaseEvent) -> None:
+        mock(event)
+
+    agent = Agent(
+        "",
+        config=test_config,
+        observers=[track_response],
+    )
+
+    await agent.ask("Hi!")
+
+    mock.assert_called()
+
+
+@pytest.mark.asyncio()
+async def test_agent_decorator_style(
     mock: MagicMock,
     test_config: TestConfig,
 ) -> None:
@@ -108,6 +146,25 @@ async def test_decorator_style(
     await agent.ask("Hi!")
 
     mock.assert_called_once()
+
+
+@pytest.mark.asyncio()
+async def test_agent_decorator_style_any_event(
+    mock: MagicMock,
+    test_config: TestConfig,
+) -> None:
+    agent = Agent(
+        "",
+        config=test_config,
+    )
+
+    @agent.observer()
+    def log_response(event: BaseEvent) -> None:
+        mock(event)
+
+    await agent.ask("Hi!")
+
+    mock.assert_called()
 
 
 @pytest.mark.asyncio()

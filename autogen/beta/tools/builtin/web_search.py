@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from collections.abc import Iterable
-from contextlib import ExitStack
+from contextlib import AsyncExitStack, ExitStack
 from dataclasses import dataclass, field
 from typing import Literal
 
@@ -38,7 +38,10 @@ class WebSearchToolSchema(ToolSchema):
 
 
 class WebSearchTool(Tool):
-    __slots__ = ("_params",)
+    __slots__ = (
+        "_params",
+        "name",
+    )
 
     def __init__(
         self,
@@ -64,13 +67,15 @@ class WebSearchTool(Tool):
         if version is not None:
             self._params["web_search_version"] = version
 
+        self.name = WEB_SEARCH_TOOL_NAME
+
     async def schemas(self, context: "Context") -> list[WebSearchToolSchema]:
         resolved = {k: resolve_variable(v, context, param_name=k) for k, v in self._params.items()}
         return [WebSearchToolSchema(**resolved)]
 
     def register(
         self,
-        stack: "ExitStack",
+        stack: "ExitStack | AsyncExitStack",
         context: "Context",
         *,
         middleware: Iterable["BaseMiddleware"] = (),

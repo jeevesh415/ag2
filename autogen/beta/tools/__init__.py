@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from autogen.beta.events.tool_events import ToolResult
+from autogen.beta.events import ToolResult
 
 from .builtin import (
     CodeExecutionTool,
@@ -19,27 +19,36 @@ from .builtin import (
     WebFetchTool,
     WebSearchTool,
 )
+from .code import SandboxCodeTool
 from .final import Toolkit, tool
-from .shell import LocalShellEnvironment, LocalShellTool, ShellEnvironment
-from .toolkits import FilesystemToolkit, SkillSearchToolkit, SkillsToolkit
+from .search import DuckDuckSearchTool, ExaToolkit, PerplexitySearchToolkit, TavilySearchTool
+from .shell import LocalShellTool
+from .skills import SkillSearchToolkit, SkillsToolkit
+from .toolkits import FilesystemToolkit, MCPServer, MCPServerConfig, MCPStdioServerConfig
 
 __all__ = (
     "CodeExecutionTool",
     "ContainerAutoEnvironment",
     "ContainerReferenceEnvironment",
+    "DuckDuckSearchTool",
+    "ExaToolkit",
     "FilesystemToolkit",
     "ImageGenerationTool",
-    "LocalShellEnvironment",
     "LocalShellTool",
+    "MCPServer",
+    "MCPServerConfig",
     "MCPServerTool",
+    "MCPStdioServerConfig",
     "MemoryTool",
     "NetworkPolicy",
-    "ShellEnvironment",
+    "PerplexitySearchToolkit",
+    "SandboxCodeTool",
     "ShellTool",
     "Skill",
     "SkillSearchToolkit",
     "SkillsTool",
     "SkillsToolkit",
+    "TavilySearchTool",
     "ToolResult",
     "Toolkit",
     "UserLocation",
